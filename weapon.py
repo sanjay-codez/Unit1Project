@@ -46,7 +46,7 @@ class Bullet(Entity):
                     # Step 2: Access the parent toilet and call its methods
                     parent_toilet = hit_info.entity.parent_toilet
                     if isinstance(parent_toilet, toilets.Toilet) or isinstance(parent_toilet, toilets.CameraMan):
-                        parent_toilet.decrement_health(7)  # Reduce health by 7
+                        parent_toilet.decrement_health(100)  # Reduce health by 7
                 # Destroy bullet after collision
                 self.destroy_bullet()
 

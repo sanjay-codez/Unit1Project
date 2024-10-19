@@ -10,7 +10,7 @@ app = Ursina()
 player = None
 toilets = []
 # flush_pressed = False
-
+#window.fullscreen = True
 
 
 # Start Menu Elements
@@ -37,12 +37,12 @@ def start_game():
     toilets = []
 
     # Pass the toilets list itself to each toilet's constructor
-    toilets.append(StandardToilet(position=(10, 0.5, 10), player_entity=player.controller, all_toilets=toilets))
-    toilets.append(FancyToilet(position=(-2, 0.5, -2), player_entity=player.controller, all_toilets=toilets))
+    toilets.append(StandardToilet(position=(10, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
+    toilets.append(FancyToilet(position=(-2, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
 
     # Add Cameramen
-    toilets.append(StandardCameraMan(position=(15, 0.5, 15), player_entity=player.controller, all_toilets=toilets))
-    toilets.append(FancyCameraMan(position=(-10, 0.5, -10), player_entity=player.controller, all_toilets=toilets))
+    toilets.append(StandardCameraMan(position=(15, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
+    toilets.append(FancyCameraMan(position=(-10, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
 
     # Set up lighting and sky
     Sky()
