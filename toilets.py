@@ -81,7 +81,7 @@ class StandardToilet(Toilet):
         current_time = time.time()
         if distance_to_player < 3 and current_time - self.last_attack_time >= 1:
             player.decrement_health(random.randint(3, 5))
-            Audio('hit_sound.mp3', autoplay=True)  # Add hit sound playback here
+            Audio('assets/hit_sound.mp3', autoplay=True)  # Add hit sound playback here
             self.last_attack_time = current_time
 
     def decrement_health(self, amount):
@@ -165,7 +165,7 @@ class FancyToilet(Toilet):
         current_time = time.time()
         if distance_to_player < 3 and current_time - self.last_attack_time >= 1:
             player.decrement_health(random.randint(3, 5))
-            Audio('hit_sound.mp3', autoplay=True)  # Add hit sound playback here
+            Audio('assets/hit_sound.mp3', autoplay=True)  # Add hit sound playback here
             self.last_attack_time = current_time
 
     def decrement_health(self, amount):
@@ -263,7 +263,7 @@ class StandardCameraMan(CameraMan):
         current_time = time.time()
         if distance_to_player < 3 and current_time - self.last_attack_time >= 1:
             player.decrement_health(random.randint(3, 5))
-            Audio('hit_sound.mp3', autoplay=True)  # Add hit sound playback here
+            Audio('assets/hit_sound.mp3', autoplay=True)  # Add hit sound playback here
             self.last_attack_time = current_time
 
     def decrement_health(self, amount):
@@ -338,7 +338,7 @@ class FancyCameraMan(CameraMan):
         current_time = time.time()
         if distance_to_player < 3 and current_time - self.last_attack_time >= 1:
             player.decrement_health(random.randint(3, 5))
-            Audio('hit_sound.mp3', autoplay=True)  # Add hit sound playback here
+            Audio('assets/hit_sound.mp3', autoplay=True)  # Add hit sound playback here
             self.last_attack_time = current_time
 
     def decrement_health(self, amount):
