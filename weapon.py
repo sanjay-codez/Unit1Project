@@ -19,7 +19,7 @@ class Weapon:
         # Use the camera's forward direction for accurate aiming
         bullet_direction = camera.forward.normalized()  # Make the bullet direction match the camera's forward direction
 
-        Audio('shoot_sound.mp3', autoplay=True)
+        Audio('assets/shoot_sound.mp3', autoplay=True)
 
         # Create and shoot the bullet
         bullet = Bullet(position=bullet_position, direction=bullet_direction)

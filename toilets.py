@@ -23,6 +23,10 @@ class Toilet(abc.ABC):
     def decrement_health(self, amount):
         pass
 
+    @classmethod
+    def duplicate(cls, position, player_entity, all_toilets):
+        pass
+
 # Different Toilet Types
 class StandardToilet(Toilet):
     def __init__(self, position, player_entity, all_toilets):
@@ -88,12 +92,24 @@ class StandardToilet(Toilet):
 
         # Add logic to destroy the toilet entity and remove from the toilets list
         if self.health <= 0:
+
+            # self.all_toilets.append(
+            #     StandardToilet.duplicate(position=self.entity.position, player_entity=self.player_entity,
+            #                              all_toilets=self.all_toilets))
             destroy(self.entity)
             destroy(self.health_bar)
 
             # Remove from the toilets list
             if self in self.all_toilets:
                 self.all_toilets.remove(self)
+
+
+    @classmethod
+    def duplicate(cls, position, player_entity, all_toilets):
+        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
+
+
+
 
 class FancyToilet(Toilet):
     def __init__(self, position, player_entity, all_toilets):
@@ -167,6 +183,10 @@ class FancyToilet(Toilet):
             if self in self.all_toilets:
                 self.all_toilets.remove(self)
 
+    @classmethod
+    def duplicate(cls, position, player_entity, all_toilets):
+        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
+
 class CameraMan(abc.ABC):
     def __init__(self, position):
         self.position = position
@@ -183,6 +203,10 @@ class CameraMan(abc.ABC):
 
     @abc.abstractmethod
     def decrement_health(self, amount):
+        pass
+
+    @classmethod
+    def duplicate(cls, position, player_entity, all_toilets):
         pass
 
 
@@ -257,6 +281,10 @@ class StandardCameraMan(CameraMan):
             if self in self.all_toilets:
                 self.all_toilets.remove(self)
 
+    @classmethod
+    def duplicate(cls, position, player_entity, all_toilets):
+        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
+
 class FancyCameraMan(CameraMan):
     def __init__(self, position, player_entity, all_toilets):
         super().__init__(position)
@@ -327,6 +355,10 @@ class FancyCameraMan(CameraMan):
             # Remove from the toilets list
             if self in self.all_toilets:
                 self.all_toilets.remove(self)
+
+    @classmethod
+    def duplicate(cls, position, player_entity, all_toilets):
+        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
 
 # Custom SmoothFollow Script
 class CustomSmoothFollow(SmoothFollow):

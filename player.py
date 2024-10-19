@@ -79,7 +79,7 @@ class Player:
     def reload(self):
         if self.ammo < self.magazine_capacity:
             self.reloading = True
-            Audio('reload_sound.mp3', autoplay=True)
+            Audio('assets/reload_sound.mp3', autoplay=True)
             invoke(self.finish_reload, delay=self.reload_time)
 
     def finish_reload(self):
