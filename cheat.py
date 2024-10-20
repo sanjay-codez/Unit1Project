@@ -2,24 +2,41 @@ import pickle
 import os
 import customtkinter as ctk
 from tkinter import messagebox
+from customexception import GameException
 
 
 # Load saved data from pickle
 def load_game_state(filename="pickle_data/savefile.pkl"):
-    if os.path.exists(filename):
-        with open(filename, "rb") as f:
-            game_state = pickle.load(f)
-        return game_state
-    else:
-        messagebox.showerror("Error", "Save file not found!")
-        return None
+    try:
+        if os.path.exists(filename):
+            with open(filename, "rb") as f:
+                try:
+                    game_state = pickle.load(f)
+                except pickle.PickleError as e:
+                    raise GameException("Failed to deserialize game state.") from e
+            return game_state
+        else:
+            raise FileNotFoundError(f"Save file '{filename}' not found.")
+    except FileNotFoundError as e:
+        # Chain the FileNotFoundError to a GameException
+        raise GameException("Unable to load game state due to missing file.") from e
+    except Exception as e:
+        # Chain any other exceptions to GameException
+        raise GameException("An unknown error occurred while loading the game state.") from e
 
 
 # Save data to pickle file
 def save_game_state(game_state, filename="pickle_data/savefile.pkl"):
-    with open(filename, "wb") as f:
-        pickle.dump(game_state, f)
-    messagebox.showinfo("Success", "Game state saved successfully!")
+    try:
+        with open(filename, "wb") as f:
+            try:
+                pickle.dump(game_state, f)
+            except pickle.PickleError as e:
+                raise GameException("Failed to serialize game state.") from e
+        messagebox.showinfo("Success", "Game state saved successfully!")
+    except Exception as e:
+        # Chain any exceptions that occur while saving
+        raise GameException("An error occurred while saving the game state.") from e
 
 
 # GUI to modify save data

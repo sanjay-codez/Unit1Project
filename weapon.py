@@ -5,6 +5,7 @@ import math
 from ursina.shaders import unlit_shader
 from ursina import Audio, lerp, Sequence
 import enemy
+from customexception import *
 
 class Weapon:
     def __init__(self, parent):

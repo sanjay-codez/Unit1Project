@@ -7,7 +7,7 @@ import time
 from abc import ABC, abstractmethod
 import pickle
 import os
-
+from customexception import GameException
 app = Ursina()
 
 # fullscreen mode
@@ -254,17 +254,21 @@ def load_game_state(filename="pickle_data/savefile.pkl"):
                 enemies.append(new_enemy)
 
         print("Game state loaded!")
-    except FileNotFoundError:
-        print("Save file not found.")
+    except FileNotFoundError as e:
+        # Explicit chaining: Raise GameException from FileNotFoundError
+        raise GameException(f"Failed to load game state: File '{filename}' not found.") from e
+
+    except Exception as e:
+        # Handle general exceptions with explicit chaining
+        raise GameException("An error occurred while loading the game state.") from e
 
 def update():
     global level_in_progress, level_start_screen_active
     if player and level_in_progress:
         try:
             player.update()
-        except AttributeError:
-            # Ensure player is properly initialized before trying to update
-            print("Player not yet initialized or has been destroyed.")
+        except AttributeError as e:
+            raise GameException("Error during player update: Player not properly initialized or destroyed.") from e
 
     if not level_start_screen_active:
         if held_keys['p']:  # Press 'P' to save game state
