@@ -91,6 +91,3 @@ class Player:
         if self.health.value <= 0:
             self.health.value = 0
             print("Player has died.")
-
-
-

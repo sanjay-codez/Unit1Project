@@ -1,18 +1,18 @@
-# toilets.py
+# enemy.py
 from ursina import *
 import abc
 from math import atan2, degrees
 import time
 
-# Abstract Base Class for Toilets
-class Toilet(abc.ABC):
+# Abstract Base Class for Enemy
+class Enemy(abc.ABC):
     def __init__(self, position):
         self.position = position
         self.health = 100
         self.max_health = 100
 
     @abc.abstractmethod
-    def flush(self):
+    def attack(self):
         pass
 
     @abc.abstractmethod
@@ -23,26 +23,26 @@ class Toilet(abc.ABC):
     def decrement_health(self, amount):
         pass
 
-    @classmethod
-    def duplicate(cls, position, player_entity, all_toilets):
-        pass
+    # @classmethod
+    # def duplicate(cls, position, player_entity, all_enemies):
+    #     pass
 
-# Different Toilet Types
-class StandardToilet(Toilet):
-    def __init__(self, position, player_entity, all_toilets):
+# Different Enemy Types
+class StandardEnemy(Enemy):
+    def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
             model='assets/man.fbx',
             scale=(.005, .005, .005),
             position=position,
             color=color.smoke,
-            name="StandardToilet",
+            name="StandardEnemy",
             double_sided=True,
             collider='box'
         )
         self.player_entity = player_entity
-        self.all_toilets = all_toilets  # Save the reference to the toilets list
-        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_toilets=all_toilets))
+        self.all_enemies = all_enemies  # Save the reference to the enemies list
+        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_enemies=all_enemies))
         self.last_attack_time = 0
 
         # Create the health bar entity
@@ -50,10 +50,10 @@ class StandardToilet(Toilet):
             model='cube',  # Using 'quad' model to make it more visible
             color=color.green,
             scale=(3, 0.5, 0.1),  # Larger size to make it more visible
-            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the toilet initially
+            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the enemy initially
             always_on_top=True  # Always render on top for better visibility
         )
-        self.entity.parent_toilet = self
+        self.entity.parent_enemy = self
 
     def update_health_bar(self):
         # Update the health bar size based on the current health
@@ -68,7 +68,7 @@ class StandardToilet(Toilet):
         else:
             self.health_bar.color = color.red
 
-        # Update the position to always hover above the toilet
+        # Update the position to always hover above the enemy
         self.health_bar.position = self.entity.position + Vec3(0, 3, 0)  # Keep it above the entity
 
 
@@ -76,7 +76,7 @@ class StandardToilet(Toilet):
         direction = (self.player_entity.position - self.health_bar.world_position).normalized()
         self.health_bar.rotation = Vec3(0, degrees(atan2(direction.x, direction.z)), 0)
 
-    def flush(self, player):
+    def attack(self, player):
         distance_to_player = (self.player_entity.position - self.entity.position).length()
         current_time = time.time()
         if distance_to_player < 3 and current_time - self.last_attack_time >= 1:
@@ -90,42 +90,42 @@ class StandardToilet(Toilet):
             self.health = 0
         self.update_health_bar()  # Update the health bar to reflect new health
 
-        # Add logic to destroy the toilet entity and remove from the toilets list
+        # Add logic to destroy the enemy entity and remove from the enemies list
         if self.health <= 0:
 
-            # self.all_toilets.append(
-            #     StandardToilet.duplicate(position=self.entity.position, player_entity=self.player_entity,
-            #                              all_toilets=self.all_toilets))
+            # self.all_enemies.append(
+            #     StandardEnemy.duplicate(position=self.entity.position, player_entity=self.player_entity,
+            #                              all_enemies=self.all_enemies))
             destroy(self.entity)
             destroy(self.health_bar)
 
-            # Remove from the toilets list
-            if self in self.all_toilets:
-                self.all_toilets.remove(self)
+            # Remove from the enemies list
+            if self in self.all_enemies:
+                self.all_enemies.remove(self)
 
 
     @classmethod
-    def duplicate(cls, position, player_entity, all_toilets):
-        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
+    def duplicate(cls, position, player_entity, all_enemies):
+        return cls(position=position, player_entity=player_entity, all_enemies=all_enemies)
 
 
 
 
-class FancyToilet(Toilet):
-    def __init__(self, position, player_entity, all_toilets):
+class FancyEnemy(Enemy):
+    def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
             model='assets/man.fbx',
             scale=(.005, .005, .005),
             position=position,
             color=color.gold,
-            name="FancyToilet",
+            name="Fancyenemy",
             double_sided=True,
             collider='box'
         )
         self.player_entity = player_entity
-        self.all_toilets = all_toilets  # Save the reference to the toilets list
-        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_toilets=all_toilets))
+        self.all_enemies = all_enemies  # Save the reference to the enemies list
+        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_enemies=all_enemies))
         self.last_attack_time = 0
 
         # Create the health bar entity
@@ -133,10 +133,10 @@ class FancyToilet(Toilet):
             model='cube',  # Using 'quad' model to make it more visible
             color=color.green,
             scale=(3, 0.5, 0.1),  # Larger size to make it more visible
-            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the toilet initially
+            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the enemy initially
             always_on_top=True  # Always render on top for better visibility
         )
-        self.entity.parent_toilet = self
+        self.entity.parent_enemy = self
 
     def update_health_bar(self):
         # Update the health bar size based on the current health
@@ -151,14 +151,14 @@ class FancyToilet(Toilet):
         else:
             self.health_bar.color = color.red
 
-        # Update the position to always hover above the toilet
+        # Update the position to always hover above the enemy
         self.health_bar.position = self.entity.position + Vec3(0, 3, 0)  # Keep it above the entity
 
         # Ensure the health bar always faces the camera (billboarding effect)
         direction = (self.player_entity.position - self.health_bar.world_position).normalized()
         self.health_bar.rotation = Vec3(0, degrees(atan2(direction.x, direction.z)), 0)
 
-    def flush(self, player):
+    def attack(self, player):
 
 
         distance_to_player = (self.player_entity.position - self.entity.position).length()
@@ -174,18 +174,18 @@ class FancyToilet(Toilet):
             self.health = 0
         self.update_health_bar()  # Update the health bar to reflect new health
 
-        # Add logic to destroy the toilet entity and remove from the toilets list
+        # Add logic to destroy the enemy entity and remove from the enemies list
         if self.health <= 0:
             destroy(self.entity)
             destroy(self.health_bar)
 
-            # Remove from the toilets list
-            if self in self.all_toilets:
-                self.all_toilets.remove(self)
+            # Remove from the enemies list
+            if self in self.all_enemies:
+                self.all_enemies.remove(self)
 
     @classmethod
-    def duplicate(cls, position, player_entity, all_toilets):
-        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
+    def duplicate(cls, position, player_entity, all_enemies):
+        return cls(position=position, player_entity=player_entity, all_enemies=all_enemies)
 
 class CameraMan(abc.ABC):
     def __init__(self, position):
@@ -206,12 +206,12 @@ class CameraMan(abc.ABC):
         pass
 
     @classmethod
-    def duplicate(cls, position, player_entity, all_toilets):
+    def duplicate(cls, position, player_entity, all_enemies):
         pass
 
 
 class StandardCameraMan(CameraMan):
-    def __init__(self, position, player_entity, all_toilets):
+    def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
             model='assets/CameraMan.glb',
@@ -223,8 +223,8 @@ class StandardCameraMan(CameraMan):
             collider='box'
         )
         self.player_entity = player_entity
-        self.all_toilets = all_toilets  # Save the reference to the toilets list
-        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_toilets=all_toilets))
+        self.all_enemies = all_enemies  # Save the reference to the enemies list
+        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_enemies=all_enemies))
         self.last_attack_time = 0
 
         # Create the health bar entity
@@ -232,10 +232,10 @@ class StandardCameraMan(CameraMan):
             model='cube',  # Using 'quad' model to make it more visible
             color=color.green,
             scale=(3, 0.5, 0.1),  # Larger size to make it more visible
-            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the toilet initially
+            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the enemy initially
             always_on_top=True  # Always render on top for better visibility
         )
-        self.entity.parent_toilet = self
+        self.entity.parent_enemy = self
 
     def update_health_bar(self):
         # Update the health bar size based on the current health
@@ -250,7 +250,7 @@ class StandardCameraMan(CameraMan):
         else:
             self.health_bar.color = color.red
 
-        # Update the position to always hover above the toilet
+        # Update the position to always hover above the enemy
         self.health_bar.position = self.entity.position + Vec3(0, 3, 0)  # Keep it above the entity
 
 
@@ -272,21 +272,21 @@ class StandardCameraMan(CameraMan):
             self.health = 0
         self.update_health_bar()  # Update the health bar to reflect new health
 
-        # Add logic to destroy the toilet entity and remove from the toilets list
+        # Add logic to destroy the enemy entity and remove from the enemies list
         if self.health <= 0:
             destroy(self.entity)
             destroy(self.health_bar)
 
-            # Remove from the toilets list
-            if self in self.all_toilets:
-                self.all_toilets.remove(self)
+            # Remove from the enemies list
+            if self in self.all_enemies:
+                self.all_enemies.remove(self)
 
     @classmethod
-    def duplicate(cls, position, player_entity, all_toilets):
-        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
+    def duplicate(cls, position, player_entity, all_enemies):
+        return cls(position=position, player_entity=player_entity, all_enemies=all_enemies)
 
 class FancyCameraMan(CameraMan):
-    def __init__(self, position, player_entity, all_toilets):
+    def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
             model='assets/CameraMan.glb',
@@ -298,8 +298,8 @@ class FancyCameraMan(CameraMan):
             collider='box'
         )
         self.player_entity = player_entity
-        self.all_toilets = all_toilets  # Save the reference to the toilets list
-        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_toilets=all_toilets))
+        self.all_enemies = all_enemies  # Save the reference to the enemies list
+        self.entity.add_script(CustomSmoothFollow(target=player_entity, offset=(0, 2, 0), speed=.5, all_enemies=all_enemies))
         self.last_attack_time = 0
 
         # Create the health bar entity
@@ -307,10 +307,10 @@ class FancyCameraMan(CameraMan):
             model='cube',  # Using 'quad' model to make it more visible
             color=color.green,
             scale=(3, 0.5, 0.1),  # Larger size to make it more visible
-            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the toilet initially
+            position=self.entity.position + Vec3(0, 3, 0),  # Place it above the enemy initially
             always_on_top=True  # Always render on top for better visibility
         )
-        self.entity.parent_toilet = self
+        self.entity.parent_enemy = self
 
     def update_health_bar(self):
         # Update the health bar size based on the current health
@@ -325,7 +325,7 @@ class FancyCameraMan(CameraMan):
         else:
             self.health_bar.color = color.red
 
-        # Update the position to always hover above the toilet
+        # Update the position to always hover above the enemy
         self.health_bar.position = self.entity.position + Vec3(0, 3, 0)  # Keep it above the entity
 
 
@@ -347,26 +347,26 @@ class FancyCameraMan(CameraMan):
             self.health = 0
         self.update_health_bar()  # Update the health bar to reflect new health
 
-        # Add logic to destroy the toilet entity and remove from the toilets list
+        # Add logic to destroy the enemy entity and remove from the enemies list
         if self.health <= 0:
             destroy(self.entity)
             destroy(self.health_bar)
 
-            # Remove from the toilets list
-            if self in self.all_toilets:
-                self.all_toilets.remove(self)
+            # Remove from the enemies list
+            if self in self.all_enemies:
+                self.all_enemies.remove(self)
 
     @classmethod
-    def duplicate(cls, position, player_entity, all_toilets):
-        return cls(position=position, player_entity=player_entity, all_toilets=all_toilets)
+    def duplicate(cls, position, player_entity, all_enemies):
+        return cls(position=position, player_entity=player_entity, all_enemies=all_enemies)
 
 # Custom SmoothFollow Script
 class CustomSmoothFollow(SmoothFollow):
-    def __init__(self, target, offset=(0, 0, 0), speed=1, all_toilets=[]):
+    def __init__(self, target, offset=(0, 0, 0), speed=1, all_enemies=[]):
         super().__init__(target=target, offset=offset, speed=speed)
         self.min_distance = 5  # Minimum distance to maintain from the player
-        self.all_toilets = all_toilets
-        self.min_toilet_distance = 2.5  # Minimum distance to maintain from other toilets
+        self.all_enemies = all_enemies
+        self.min_enemy_distance = 2.5  # Minimum distance to maintain from other enemies
 
     @staticmethod
     def calculate_distance(position1, position2):
@@ -396,21 +396,21 @@ class CustomSmoothFollow(SmoothFollow):
         if distance_to_player > self.min_distance:
             super().update()  # Call the original update to follow the player
 
-        # Smoothly rotate the toilet to face the player on the Y-axis only
+        # Smoothly rotate the enemy to face the player on the Y-axis only
         desired_rotation_y = CustomSmoothFollow.calculate_desired_rotation_y(self.target.position, self.entity.position)
         current_rotation_y = self.entity.rotation_y
         self.entity.rotation_y = CustomSmoothFollow.lerp_rotation(current_rotation_y, desired_rotation_y, time.dt * 2)
 
-        # Ensure the toilet doesn't rotate around the X or Z axis (feet on the ground)
+        # Ensure the enemy doesn't rotate around the X or Z axis (feet on the ground)
         CustomSmoothFollow.ensure_ground_rotation(self.entity)
 
         # make sure they don't overlap
-        for other in self.all_toilets:
+        for other in self.all_enemies:
             if other.entity == self.entity:
                 continue
-            # Calculate the distance to other toilets using the static method
+            # Calculate the distance to other enemies using the static method
             distance_to_other = CustomSmoothFollow.calculate_distance(other.entity.position, self.entity.position)
-            if distance_to_other < self.min_toilet_distance:
-                # move away from the other toilet
+            if distance_to_other < self.min_enemy_distance:
+                # move away from the other enemy
                 direction_away = CustomSmoothFollow.calculate_direction_away(self.entity.position, other.entity.position)
                 self.entity.position += direction_away * time.dt * self.speed

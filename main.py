@@ -1,7 +1,10 @@
 # main.py
 from ursina import *
+
+import enemy
 from player import Player
-from toilets import StandardToilet, FancyToilet, StandardCameraMan, FancyCameraMan
+from enemy import StandardEnemy, FancyEnemy, StandardCameraMan, FancyCameraMan
+
 import time
 from abc import ABC, abstractmethod
 import pickle
@@ -15,7 +18,7 @@ if not os.path.exists('pickle_data'):
 
 # Global variables
 player = None
-toilets = []
+enemies = []
 current_level_index = 0
 level_start_button = None
 level_title_text = None
@@ -45,13 +48,13 @@ def destroy_ui_elements():
         destroy(ui_element)
     level_overlay_ui.clear()
 
-# Abstract Base Class for Levels
-class Level(ABC):
+# Abstract class for Game Level
+class GameLevel(ABC):
     def __init__(self, num_enemies_each_type):
         self.num_enemies_each_type = num_enemies_each_type
 
     def load(self):
-        global player, toilets, level_in_progress, sky_entity
+        global player, enemies, level_in_progress, sky_entity
         # Set up platform and environment if not already set up
         if sky_entity is None:
             self.setup_environment()
@@ -59,7 +62,7 @@ class Level(ABC):
         # Create the player if not already created
         if player is None:
             player = Player()
-        toilets = []
+        enemies = []
         self.spawn_enemies()
         level_in_progress = True
 
@@ -81,42 +84,45 @@ class Level(ABC):
         pass
 
     def all_enemies_killed(self):
-        return len(toilets) == 0
+        return len(enemies) == 0
 
-class Level1(Level):
+# Derived class for Level 1
+class LevelOne(GameLevel):
     def __init__(self):
         super().__init__(num_enemies_each_type=1)
 
     def spawn_enemies(self):
-        toilets.append(StandardToilet(position=(10, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-        toilets.append(FancyToilet(position=(-2, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-        toilets.append(StandardCameraMan(position=(15, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-        toilets.append(FancyCameraMan(position=(-10, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
+        enemies.append(StandardEnemy(position=(10, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+        enemies.append(FancyEnemy(position=(-2, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+        enemies.append(StandardCameraMan(position=(15, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+        enemies.append(FancyCameraMan(position=(-10, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
 
-class Level2(Level):
+# Derived class for Level 2
+class LevelTwo(GameLevel):
     def __init__(self):
         super().__init__(num_enemies_each_type=2)
 
     def spawn_enemies(self):
         for i in range(2):
-            toilets.append(StandardToilet(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-            toilets.append(FancyToilet(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-            toilets.append(StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-            toilets.append(FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
+            enemies.append(StandardEnemy(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            enemies.append(FancyEnemy(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            enemies.append(StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            enemies.append(FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
 
-class Level3(Level):
+# Derived class for Level 3
+class LevelThree(GameLevel):
     def __init__(self):
         super().__init__(num_enemies_each_type=3)
 
     def spawn_enemies(self):
         for i in range(3):
-            toilets.append(StandardToilet(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-            toilets.append(FancyToilet(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-            toilets.append(StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
-            toilets.append(FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller, all_toilets=toilets))
+            enemies.append(StandardEnemy(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            enemies.append(FancyEnemy(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            enemies.append(StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            enemies.append(FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
 
-# Levels list
-levels = [Level1(), Level2(), Level3()]
+# GameLevels list
+gamelevels = [LevelOne(), LevelTwo(), LevelThree()]
 
 def load_level(level_index):
     global level_start_screen_active
@@ -141,7 +147,7 @@ def start_level(level_index):
     global level_start_button, level_title_text, level_in_progress, level_start_screen_active
     # Destroy only the overlay UI elements
     destroy_ui_elements()
-    levels[level_index].load()
+    gamelevels[level_index].load()
     level_in_progress = True
     level_start_screen_active = False  # We're no longer on the start screen
 
@@ -149,11 +155,11 @@ def start_level(level_index):
     mouse.locked = True
 
 def save_game_state(filename="pickle_data/savefile.pkl"):
-    global player, toilets, current_level_index
+    global player, enemies, current_level_index
     game_state = {
         "player_position": player.controller.position,
         "player_health": player.health.value,
-        "toilets": [(toilet.__class__.__name__, toilet.entity.position, toilet.health) for toilet in toilets],
+        "enemies": [(enemy.__class__.__name__, enemy.entity.position, enemy.health) for enemy in enemies],
         "current_level_index": current_level_index
     }
     with open(filename, "wb") as f:
@@ -161,7 +167,7 @@ def save_game_state(filename="pickle_data/savefile.pkl"):
     print("Game state saved!")
 
 def load_game_state(filename="pickle_data/savefile.pkl"):
-    global player, toilets, current_level_index
+    global player, enemies, current_level_index
     try:
         with open(filename, "rb") as f:
             game_state = pickle.load(f)
@@ -170,20 +176,20 @@ def load_game_state(filename="pickle_data/savefile.pkl"):
 
             current_level_index = game_state["current_level_index"]
 
-            # Clear existing toilets and load new ones
-            for toilet in toilets:
-                destroy(toilet.entity)
-                if hasattr(toilet, 'health_bar'):
-                    destroy(toilet.health_bar)  # Properly destroy the health bar as well
-            toilets.clear()
+            # Clear existing enemies and load new ones
+            for enemy in enemies:
+                destroy(enemy.entity)
+                if hasattr(enemy, 'health_bar'):
+                    destroy(enemy.health_bar)  # Properly destroy the health bar as well
+            enemies.clear()
 
-            # Reinitialize toilets with saved state
-            for toilet_class_name, position, health in game_state["toilets"]:
-                toilet_class = globals()[toilet_class_name]
-                new_toilet = toilet_class(position=position, player_entity=player.controller, all_toilets=toilets)
-                new_toilet.health = health
-                new_toilet.update_health_bar()
-                toilets.append(new_toilet)
+            # Reinitialize enemies with saved state
+            for enemy_class_name, position, health in game_state["enemies"]:
+                enemy_class = globals()[enemy_class_name]
+                new_enemy = enemy_class(position=position, player_entity=player.controller, all_enemies=enemies)
+                new_enemy.health = health
+                new_enemy.update_health_bar()
+                enemies.append(new_enemy)
 
         print("Game state loaded!")
     except FileNotFoundError:
@@ -205,22 +211,22 @@ def update():
         if held_keys['l']:  # Press 'L' to load game state
             load_game_state()
 
-    for toilet in toilets:
-        if hasattr(toilet, "flush"):
-            toilet.flush(player)
-        elif hasattr(toilet, "attack"):
-            toilet.attack(player)
-        toilet.update_health_bar()  # Update health text every frame
+    for enemy in enemies:
+        if hasattr(enemy, "attack"):
+            enemy.attack(player)
+        elif hasattr(enemy, "attack"):
+            enemy.attack(player)
+        enemy.update_health_bar()  # Update health text every frame
 
     # Check if current level is complete
-    if level_in_progress and current_level_index < len(levels) and levels[current_level_index].all_enemies_killed():
+    if level_in_progress and current_level_index < len(gamelevels) and gamelevels[current_level_index].all_enemies_killed():
         level_in_progress = False
         go_to_next_level()
 
 def go_to_next_level():
     global current_level_index
     current_level_index += 1
-    if current_level_index < len(levels):
+    if current_level_index < len(gamelevels):
         load_level(current_level_index)
     else:
         show_congratulations_screen()
@@ -242,7 +248,7 @@ def show_congratulations_screen():
 def show_start_menu():
     global title_text, start_button
     destroy_ui_elements()  # Clear previous UI elements if any
-    title_text = Text(text='Skibidi Showdown', scale=5, origin=(0, 0), y=0.3, color=color.white)
+    title_text = Text(text='Unit 1 Project', scale=5, origin=(0, 0), y=0.3, color=color.white)
     start_button = Button(text='Start Game', color=color.azure, scale=(0.25, 0.1), y=-0.1)
     start_button.on_click = lambda: (destroy(start_button), destroy(title_text), load_level(current_level_index))
 

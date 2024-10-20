@@ -76,30 +76,30 @@ class SaveEditorGUI(ctk.CTk):
 
             # Reset toilets based on selected level
             if new_level_index == 0:  # Level 1
-                self.game_state["toilets"] = [
-                    ("StandardToilet", (10, 0.5, 2), 100),
-                    ("FancyToilet", (-2, 0.5, 2), 100),
+                self.game_state["enemies"] = [
+                    ("StandardEnemy", (10, 0.5, 2), 100),
+                    ("FancyEnemy", (-2, 0.5, 2), 100),
                     ("StandardCameraMan", (15, 0.5, 2), 100),
                     ("FancyCameraMan", (-10, 0.5, 2), 100)
                 ]
             elif new_level_index == 1:  # Level 2
-                self.game_state["toilets"] = [
-                    ("StandardToilet", (10, 0.5, 2), 100),
-                    ("FancyToilet", (-2, 0.5, 2), 100),
+                self.game_state["enemies"] = [
+                    ("StandardEnemy", (10, 0.5, 2), 100),
+                    ("FancyEnemy", (-2, 0.5, 2), 100),
                     ("StandardCameraMan", (15, 0.5, 2), 100),
                     ("FancyCameraMan", (-10, 0.5, 2), 100),
-                    ("StandardToilet", (15, 0.5, 2), 100),
-                    ("FancyToilet", (-7, 0.5, 2), 100)
+                    ("StandardEnemy", (15, 0.5, 2), 100),
+                    ("FancyEnemy", (-7, 0.5, 2), 100)
                 ]
             elif new_level_index == 2:  # Level 3
-                self.game_state["toilets"] = [
-                    ("StandardToilet", (10, 0.5, 2), 100),
-                    ("FancyToilet", (-2, 0.5, 2), 100),
+                self.game_state["enemies"] = [
+                    ("StandardEnemy", (10, 0.5, 2), 100),
+                    ("FancyEnemy", (-2, 0.5, 2), 100),
                     ("StandardCameraMan", (15, 0.5, 2), 100),
                     ("FancyCameraMan", (-10, 0.5, 2), 100),
-                    ("StandardToilet", (15, 0.5, 2), 100),
-                    ("FancyToilet", (-7, 0.5, 2), 100),
-                    ("StandardToilet", (20, 0.5, 2), 100)
+                    ("StandardEnemy", (15, 0.5, 2), 100),
+                    ("FancyEnemy", (-7, 0.5, 2), 100),
+                    ("StandardEnemy", (20, 0.5, 2), 100)
                 ]
 
         # Save updated game state
