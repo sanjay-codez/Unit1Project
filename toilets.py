@@ -368,29 +368,49 @@ class CustomSmoothFollow(SmoothFollow):
         self.all_toilets = all_toilets
         self.min_toilet_distance = 2.5  # Minimum distance to maintain from other toilets
 
+    @staticmethod
+    def calculate_distance(position1, position2):
+        return (position1 - position2).length()
+
+    @staticmethod
+    def calculate_desired_rotation_y(target_position, entity_position):
+        target_direction = (target_position - entity_position).normalized()
+        return atan2(target_direction.x, target_direction.z)
+
+    @staticmethod
+    def lerp_rotation(current_rotation, desired_rotation, factor):
+        return lerp(current_rotation, degrees(desired_rotation), factor)
+
+    @staticmethod
+    def ensure_ground_rotation(entity):
+        entity.rotation_x = 0
+        entity.rotation_z = 0
+
+    @staticmethod
+    def calculate_direction_away(position1, position2):
+        return (position1 - position2).normalized()
+
     def update(self):
-        distance_to_player = (self.target.position - self.entity.position).length()
+        # Calculate the distance to the player using the static method
+        distance_to_player = CustomSmoothFollow.calculate_distance(self.target.position, self.entity.position)
         if distance_to_player > self.min_distance:
             super().update()  # Call the original update to follow the player
 
         # Smoothly rotate the toilet to face the player on the Y-axis only
-        target_direction = (self.target.position - self.entity.position).normalized()
-        # Calculate the desired yaw (rotation around the Y-axis)
-        desired_rotation_y = atan2(target_direction.x, target_direction.z)
+        desired_rotation_y = CustomSmoothFollow.calculate_desired_rotation_y(self.target.position, self.entity.position)
         current_rotation_y = self.entity.rotation_y
-        self.entity.rotation_y = lerp(current_rotation_y, degrees(desired_rotation_y), time.dt * 2)
+        self.entity.rotation_y = CustomSmoothFollow.lerp_rotation(current_rotation_y, desired_rotation_y, time.dt * 2)
 
         # Ensure the toilet doesn't rotate around the X or Z axis (feet on the ground)
-        self.entity.rotation_x = 0
-        self.entity.rotation_z = 0
+        CustomSmoothFollow.ensure_ground_rotation(self.entity)
 
         # make sure they don't overlap
         for other in self.all_toilets:
             if other.entity == self.entity:
                 continue
-            distance_to_other = (other.entity.position - self.entity.position).length()
+            # Calculate the distance to other toilets using the static method
+            distance_to_other = CustomSmoothFollow.calculate_distance(other.entity.position, self.entity.position)
             if distance_to_other < self.min_toilet_distance:
                 # move away from the other toilet
-                direction_away = (self.entity.position - other.entity.position).normalized()
+                direction_away = CustomSmoothFollow.calculate_direction_away(self.entity.position, other.entity.position)
                 self.entity.position += direction_away * time.dt * self.speed
-

@@ -4,8 +4,14 @@ from player import Player
 from toilets import StandardToilet, FancyToilet, StandardCameraMan, FancyCameraMan
 import time
 from abc import ABC, abstractmethod
+import pickle
+import os
 
 app = Ursina()
+
+# Create the pickle_data folder if it does not exist
+if not os.path.exists('pickle_data'):
+    os.makedirs('pickle_data')
 
 # Global variables
 player = None
@@ -18,6 +24,7 @@ exit_button = None
 level_in_progress = False
 sky_entity = None
 level_overlay_ui = []
+level_start_screen_active = False  # New flag to track whether we're on the level start screen
 
 def destroy_ui_elements():
     global level_start_button, level_title_text, congrats_text, exit_button
@@ -112,7 +119,9 @@ class Level3(Level):
 levels = [Level1(), Level2(), Level3()]
 
 def load_level(level_index):
+    global level_start_screen_active
     show_level_start_screen(level_index)
+    level_start_screen_active = True  # Indicate that we're on the start screen
 
 def show_level_start_screen(level_index):
     global level_start_button, level_title_text
@@ -129,23 +138,72 @@ def show_level_start_screen(level_index):
     mouse.locked = False
 
 def start_level(level_index):
-    global level_start_button, level_title_text, level_in_progress
+    global level_start_button, level_title_text, level_in_progress, level_start_screen_active
     # Destroy only the overlay UI elements
     destroy_ui_elements()
     levels[level_index].load()
     level_in_progress = True
+    level_start_screen_active = False  # We're no longer on the start screen
 
     # Lock the mouse cursor when the level starts
     mouse.locked = True
 
+def save_game_state(filename="pickle_data/savefile.pkl"):
+    global player, toilets, current_level_index
+    game_state = {
+        "player_position": player.controller.position,
+        "player_health": player.health.value,
+        "toilets": [(toilet.__class__.__name__, toilet.entity.position, toilet.health) for toilet in toilets],
+        "current_level_index": current_level_index
+    }
+    with open(filename, "wb") as f:
+        pickle.dump(game_state, f)
+    print("Game state saved!")
+
+def load_game_state(filename="pickle_data/savefile.pkl"):
+    global player, toilets, current_level_index
+    try:
+        with open(filename, "rb") as f:
+            game_state = pickle.load(f)
+            player.controller.position = game_state["player_position"]
+            player.health.value = game_state["player_health"]
+
+            current_level_index = game_state["current_level_index"]
+
+            # Clear existing toilets and load new ones
+            for toilet in toilets:
+                destroy(toilet.entity)
+                if hasattr(toilet, 'health_bar'):
+                    destroy(toilet.health_bar)  # Properly destroy the health bar as well
+            toilets.clear()
+
+            # Reinitialize toilets with saved state
+            for toilet_class_name, position, health in game_state["toilets"]:
+                toilet_class = globals()[toilet_class_name]
+                new_toilet = toilet_class(position=position, player_entity=player.controller, all_toilets=toilets)
+                new_toilet.health = health
+                new_toilet.update_health_bar()
+                toilets.append(new_toilet)
+
+        print("Game state loaded!")
+    except FileNotFoundError:
+        print("Save file not found.")
+
 def update():
-    global level_in_progress
+    global level_in_progress, level_start_screen_active
     if player and level_in_progress:
         try:
             player.update()
         except AttributeError:
             # Ensure player is properly initialized before trying to update
             print("Player not yet initialized or has been destroyed.")
+
+    if not level_start_screen_active:
+        if held_keys['p']:  # Press 'P' to save game state
+            save_game_state()
+
+        if held_keys['l']:  # Press 'L' to load game state
+            load_game_state()
 
     for toilet in toilets:
         if hasattr(toilet, "flush"):
@@ -163,7 +221,7 @@ def go_to_next_level():
     global current_level_index
     current_level_index += 1
     if current_level_index < len(levels):
-        show_level_start_screen(current_level_index)
+        load_level(current_level_index)
     else:
         show_congratulations_screen()
 
