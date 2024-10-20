@@ -1,16 +1,17 @@
 # main.py
 from ursina import *
-
 import enemy
 from player import Player
 from enemy import StandardEnemy, FancyEnemy, StandardCameraMan, FancyCameraMan
-
 import time
 from abc import ABC, abstractmethod
 import pickle
 import os
 
 app = Ursina()
+
+# fullscreen mode
+window.fullscreen = True
 
 # Create the pickle_data folder if it does not exist
 if not os.path.exists('pickle_data'):
@@ -92,10 +93,30 @@ class LevelOne(GameLevel):
         super().__init__(num_enemies_each_type=1)
 
     def spawn_enemies(self):
-        enemies.append(StandardEnemy(position=(10, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-        enemies.append(FancyEnemy(position=(-2, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-        enemies.append(StandardCameraMan(position=(15, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-        enemies.append(FancyCameraMan(position=(-10, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+        # Create original enemies
+        enemy1 = StandardEnemy(position=(10, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+        enemy2 = FancyEnemy(position=(-2, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+        enemy3 = StandardCameraMan(position=(15, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+        enemy4 = FancyCameraMan(position=(-10, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+
+
+        # Append original enemies
+        enemies.append(enemy1)
+        enemies.append(enemy2)
+        enemies.append(enemy3)
+        enemies.append(enemy4)
+
+        # Check for duplication (20% chance for each enemy)
+        for enemy in [enemy1, enemy2, enemy3, enemy4]:
+            # Check if the enemy is alive
+            if StandardEnemy.is_alive(enemy):
+                print(f"{enemy.entity.name} is alive!")
+
+
+            if random.random() < 0.20:  # 20% chance to duplicate
+                duplicate = enemy.__class__.duplicate(position=enemy.entity.position + Vec3(2, 0, 0),
+                                                     player_entity=enemy.player_entity, all_enemies=enemies)
+                enemies.append(duplicate)
 
 # Derived class for Level 2
 class LevelTwo(GameLevel):
@@ -104,10 +125,30 @@ class LevelTwo(GameLevel):
 
     def spawn_enemies(self):
         for i in range(2):
-            enemies.append(StandardEnemy(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-            enemies.append(FancyEnemy(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-            enemies.append(StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-            enemies.append(FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            # Create original enemies
+            enemy1 = StandardEnemy(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+            enemy2 = FancyEnemy(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+            enemy3 = StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller,
+                                       all_enemies=enemies)
+            enemy4 = FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller,
+                                    all_enemies=enemies)
+
+            # Append original enemies
+            enemies.append(enemy1)
+            enemies.append(enemy2)
+            enemies.append(enemy3)
+            enemies.append(enemy4)
+
+            # Check for duplication (50% chance for each enemy)
+            for enemy in [enemy1, enemy2, enemy3, enemy4]:
+                # Check if the enemy is alive
+                if StandardEnemy.is_alive(enemy):
+                    print(f"{enemy.entity.name} is alive!")
+
+                if random.random() < 0.50:  # 50% chance to duplicate
+                    duplicate = enemy.__class__.duplicate(position=enemy.entity.position + Vec3(2, 0, 0),
+                                                          player_entity=enemy.player_entity, all_enemies=enemies)
+                    enemies.append(duplicate)
 
 # Derived class for Level 3
 class LevelThree(GameLevel):
@@ -116,10 +157,31 @@ class LevelThree(GameLevel):
 
     def spawn_enemies(self):
         for i in range(3):
-            enemies.append(StandardEnemy(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-            enemies.append(FancyEnemy(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-            enemies.append(StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
-            enemies.append(FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies))
+            # Create original enemies
+            enemy1 = StandardEnemy(position=(10 + i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+            enemy2 = FancyEnemy(position=(-2 - i * 5, 0.5, 2), player_entity=player.controller, all_enemies=enemies)
+            enemy3 = StandardCameraMan(position=(15 + i * 5, 0.5, 2), player_entity=player.controller,
+                                       all_enemies=enemies)
+            enemy4 = FancyCameraMan(position=(-10 - i * 5, 0.5, 2), player_entity=player.controller,
+                                    all_enemies=enemies)
+
+            # Append original enemies
+            enemies.append(enemy1)
+            enemies.append(enemy2)
+            enemies.append(enemy3)
+            enemies.append(enemy4)
+
+            # Check for duplication (70% chance for each enemy)
+            for enemy in [enemy1, enemy2, enemy3, enemy4]:
+
+                # Check if the enemy is alive
+                if StandardEnemy.is_alive(enemy):
+                    print(f"{enemy.entity.name} is alive!")
+
+                if random.random() < 0.70:  # 70% chance to duplicate
+                    duplicate = enemy.__class__.duplicate(position=enemy.entity.position + Vec3(2, 0, 0),
+                                                          player_entity=enemy.player_entity, all_enemies=enemies)
+                    enemies.append(duplicate)
 
 # GameLevels list
 gamelevels = [LevelOne(), LevelTwo(), LevelThree()]
@@ -158,7 +220,7 @@ def save_game_state(filename="pickle_data/savefile.pkl"):
     global player, enemies, current_level_index
     game_state = {
         "player_position": player.controller.position,
-        "player_health": player.health.value,
+        "player_health": player.get_health(),
         "enemies": [(enemy.__class__.__name__, enemy.entity.position, enemy.health) for enemy in enemies],
         "current_level_index": current_level_index
     }
@@ -172,7 +234,7 @@ def load_game_state(filename="pickle_data/savefile.pkl"):
         with open(filename, "rb") as f:
             game_state = pickle.load(f)
             player.controller.position = game_state["player_position"]
-            player.health.value = game_state["player_health"]
+            player.set_health(game_state["player_health"])
 
             current_level_index = game_state["current_level_index"]
 
@@ -212,10 +274,7 @@ def update():
             load_game_state()
 
     for enemy in enemies:
-        if hasattr(enemy, "attack"):
-            enemy.attack(player)
-        elif hasattr(enemy, "attack"):
-            enemy.attack(player)
+        enemy.attack(player)
         enemy.update_health_bar()  # Update health text every frame
 
     # Check if current level is complete

@@ -23,9 +23,19 @@ class Enemy(abc.ABC):
     def decrement_health(self, amount):
         pass
 
-    # @classmethod
-    # def duplicate(cls, position, player_entity, all_enemies):
-    #     pass
+    @classmethod
+    def is_alive(cls, enemy_instance):
+        """Check if the enemy is still alive based on their health."""
+        return enemy_instance.health > 0
+
+    @classmethod
+    def siphon_health(cls, enemy_instance, amount):
+        """Restore health to the enemy when they siphon from the player."""
+        enemy_instance.health += amount
+        if enemy_instance.health > enemy_instance.max_health:
+            enemy_instance.health = enemy_instance.max_health
+        enemy_instance.update_health_bar()
+
 
 # Different Enemy Types
 class StandardEnemy(Enemy):
@@ -159,14 +169,16 @@ class FancyEnemy(Enemy):
         self.health_bar.rotation = Vec3(0, degrees(atan2(direction.x, direction.z)), 0)
 
     def attack(self, player):
-
-
         distance_to_player = (self.player_entity.position - self.entity.position).length()
         current_time = time.time()
         if distance_to_player < 3 and current_time - self.last_attack_time >= 1:
-            player.decrement_health(random.randint(3, 5))
-            Audio('assets/hit_sound.mp3', autoplay=True)  # Add hit sound playback here
+            damage = random.randint(3, 5)
+            player.decrement_health(damage)
+            Audio('assets/hit_sound.mp3', autoplay=True)
             self.last_attack_time = current_time
+
+            # Use the siphon_health class method
+            Enemy.siphon_health(self, damage)
 
     def decrement_health(self, amount):
         self.health -= amount
@@ -208,6 +220,19 @@ class CameraMan(abc.ABC):
     @classmethod
     def duplicate(cls, position, player_entity, all_enemies):
         pass
+
+    @classmethod
+    def is_alive(cls, enemy_instance):
+        """Check if the enemy is still alive based on their health."""
+        return enemy_instance.health > 0
+
+    @classmethod
+    def siphon_health(cls, enemy_instance, amount):
+        """Restore health to the enemy when they siphon from the player."""
+        enemy_instance.health += amount
+        if enemy_instance.health > enemy_instance.max_health:
+            enemy_instance.health = enemy_instance.max_health
+        enemy_instance.update_health_bar()
 
 
 class StandardCameraMan(CameraMan):
@@ -337,9 +362,13 @@ class FancyCameraMan(CameraMan):
         distance_to_player = (self.player_entity.position - self.entity.position).length()
         current_time = time.time()
         if distance_to_player < 3 and current_time - self.last_attack_time >= 1:
-            player.decrement_health(random.randint(3, 5))
-            Audio('assets/hit_sound.mp3', autoplay=True)  # Add hit sound playback here
+            damage = random.randint(3, 5)
+            player.decrement_health(damage)
+            Audio('assets/hit_sound.mp3', autoplay=True)
             self.last_attack_time = current_time
+
+            # Use the siphon_health class method
+            Enemy.siphon_health(self, damage)
 
     def decrement_health(self, amount):
         self.health -= amount
@@ -364,7 +393,7 @@ class FancyCameraMan(CameraMan):
 class CustomSmoothFollow(SmoothFollow):
     def __init__(self, target, offset=(0, 0, 0), speed=1, all_enemies=[]):
         super().__init__(target=target, offset=offset, speed=speed)
-        self.min_distance = 5  # Minimum distance to maintain from the player
+        self.min_distance = 2  # Minimum distance to maintain from the player
         self.all_enemies = all_enemies
         self.min_enemy_distance = 2.5  # Minimum distance to maintain from other enemies
 

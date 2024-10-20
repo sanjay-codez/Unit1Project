@@ -8,23 +8,24 @@ import enemy
 
 class Weapon:
     def __init__(self, parent):
-        # Position and orientation of the weapon in front of the player
-        self.entity = Entity(parent=parent, model='assets/MP5K', color=color.black, scale=(0.02, 0.01, 0.05),
-                             position=Vec3(0.5, -0.5, 1.5), shader=unlit_shader)
+        self.__entity = Entity(parent=parent, model='assets/MP5K', color=color.black, scale=(0.02, 0.01, 0.05),
+                               position=Vec3(0.5, -0.5, 1.5), shader=unlit_shader)
 
-    def shoot(self):
-        # Check if ammo is available before shooting
-        bullet_position = self.entity.world_position + self.entity.forward * 1  # Offset from the weapon to avoid collision
-
-        # Use the camera's forward direction for accurate aiming
-        bullet_direction = camera.forward.normalized()  # Make the bullet direction match the camera's forward direction
-
+    # Private shoot method
+    def __shoot(self):
+        bullet_position = self.__entity.world_position + self.__entity.forward * 1
+        bullet_direction = camera.forward.normalized()
         Audio('assets/shoot_sound.mp3', autoplay=True)
-
-        # Create and shoot the bullet
         bullet = Bullet(position=bullet_position, direction=bullet_direction)
         return bullet
 
+    # Public shoot interface
+    def shoot(self):
+        return self.__shoot()
+
+    @property
+    def entity(self):
+        return self.__entity
 
 class Bullet(Entity):
     def __init__(self, position, direction):
@@ -46,7 +47,7 @@ class Bullet(Entity):
                     # Step 2: Access the parent enemy and call its methods
                     parent_enemy = hit_info.entity.parent_enemy
                     if isinstance(parent_enemy, enemy.Enemy) or isinstance(parent_enemy, enemy.CameraMan):
-                        parent_enemy.decrement_health(100)  # Reduce health by 7
+                        parent_enemy.decrement_health(7)  # Reduce health by 7
                 # Destroy bullet after collision
                 self.destroy_bullet()
 

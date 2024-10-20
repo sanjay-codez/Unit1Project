@@ -6,88 +6,127 @@ from ursina import Audio, Text
 from ursina import invoke
 from weapon import Weapon, Bullet
 import time
+import customtkinter as ctk
+import sys
 
 class Player:
     def __init__(self, position=(0, 2, 0), speed=5, jump_height=2):
-        self.controller = FirstPersonController(position=position)
-        self.controller.speed = speed
-        self.controller.jump_height = jump_height
+        self.__controller = FirstPersonController(position=position)
+        self.__controller.speed = speed
+        self.__controller.jump_height = jump_height
 
-        self.start_time = time.time()
+        self.__start_time = time.time()
 
-        # Adjust weapon position to be visible in first-person view
-        self.weapon = Weapon(parent=self.controller.camera_pivot)
-        self.weapon.entity.position = Vec3(0.5, -0.5, 1.5)  # Adjust position to make it visible in front of the player
-        self.weapon.entity.rotation = Vec3(0, 0, 0)  # Make sure it's oriented correctly
+        self.__weapon = Weapon(parent=self.__controller.camera_pivot)
+        self.__weapon.entity.position = Vec3(0.5, -0.5, 1.5)
+        self.__weapon.entity.rotation = Vec3(0, 0, 0)
 
-        self.bullets = []
-        self.shoot_cooldown = .1  # Cooldown time in seconds
-        self.last_shoot_time = 0
-        self.health = HealthBar(bar_color=color.lime.tint(-.25), curve=.5, max_value=100, value=100, scale=(.35, .05))
+        self.__bullets = []
+        self.__shoot_cooldown = .1
+        self.__last_shoot_time = 0
+        self.__health = HealthBar(bar_color=color.lime.tint(-.25), curve=.5, max_value=100, value=100)
 
-        # Ammo-related attributes
-        self.ammo = 60
-        self.magazine_capacity = 60
-        self.reloading = False
-        self.reload_time = 2.5  # Time to reload in seconds
+        self.__ammo = 60
+        self.__magazine_capacity = 60
+        self.__reloading = False
+        self.__reload_time = 2.5
 
-        # Ammo Counter UI
-        self.ammo_counter = Text(text=f'MP5K: {self.ammo}/{self.magazine_capacity}', position=(0.70, -0.45), scale=2, origin=(0, 0), color=color.white)
+        self.__ammo_counter = Text(text=f'MP5K: {self.__ammo}/{self.__magazine_capacity}', position=(0.70, -0.45), scale=2, origin=(0, 0), color=color.white)
 
+    # Getter for health
+    def get_health(self):
+        return self.__health.value
+
+    def set_health(self, value):
+        self.__health.value = value
+
+    # Decrement health safely
+    def decrement_health(self, number):
+        self.__health.value -= number
+        if self.__health.value <= 0:
+            self.__health.value = 0
+            print("Player has died.")
+            self.game_over_popup()  # Call the game over popup when player dies
+
+    # Display Game Over CustomTkinter Popup
+    def game_over_popup(self):
+        # Initialize the Tkinter root window
+        root = ctk.CTk()
+        root.geometry("300x150")
+        root.title("Game Over")
+
+        # Create a label for the popup
+        label = ctk.CTkLabel(root, text="Game Over!", font=("Arial", 24))
+        label.pack(pady=20)
+
+        # Create an exit button
+        button = ctk.CTkButton(root, text="Exit Game", command=self.exit_game)
+        button.pack(pady=20)
+
+        # Start the Tkinter main loop
+        root.mainloop()
+
+    # Exit the game
+    def exit_game(self):
+        sys.exit()
+
+    # Shooting logic (private)
+    def __shoot(self):
+        if time.time() - self.__last_shoot_time >= self.__shoot_cooldown and self.__ammo > 0:
+            bullet = self.__weapon.shoot()
+            if bullet:
+                self.__bullets.append(bullet)
+                self.__ammo -= 1
+            self.__last_shoot_time = time.time()
+
+    # Public method to control shooting
+    def shoot(self):
+        # Check if the mouse is clicked and if the player is not reloading
+        if mouse.left and not self.__reloading and time.time() - self.__start_time > 1:
+            self.__shoot()
+
+    # Update method
     def update(self):
-        # Increase speed when holding shift
         if held_keys['shift']:
-            self.controller.speed = 10
+            self.__controller.speed = 10
         else:
-            self.controller.speed = 5
+            self.__controller.speed = 5
 
-        # Handle reload
-        if held_keys['r'] and not self.reloading:
+        if held_keys['r'] and not self.__reloading:
             self.reload()
 
-        # Delay initial shooting after game start
-        if time.time() - self.start_time > 1:  # Only allow shooting 5 seconds after game starts
-            # Shooting mechanism with cooldown
-            if mouse.left and not self.reloading and time.time() - self.last_shoot_time >= self.shoot_cooldown:
-                self.shoot()
-                self.last_shoot_time = time.time()  # Update last shoot time to prevent immediate re-fire
+        # Only shoot when the left mouse button is pressed
+        if mouse.left:
+            self.shoot()
 
-        # Update bullets
-        for bullet in self.bullets:
+        for bullet in self.__bullets:
             bullet.update()
             if not bullet.alive:
-                self.bullets.remove(bullet)
+                self.__bullets.remove(bullet)
 
-        # Update ammo counter color and text
-        self.ammo_counter.text = f'MP5K: {self.ammo}/{self.magazine_capacity}'
-        if self.ammo > 20:
-            self.ammo_counter.color = color.white
-        elif 1 <= self.ammo <= 20:
-            self.ammo_counter.color = color.yellow
+        self.__ammo_counter.text = f'MP5K: {self.__ammo}/{self.__magazine_capacity}'
+        if self.__ammo > 20:
+            self.__ammo_counter.color = color.white
+        elif 1 <= self.__ammo <= 20:
+            self.__ammo_counter.color = color.yellow
         else:
-            self.ammo_counter.color = color.red
+            self.__ammo_counter.color = color.red
 
-    def shoot(self):
-        if time.time() - self.last_shoot_time >= self.shoot_cooldown and self.ammo > 0:
-            bullet = self.weapon.shoot()  # Pass in player position
-            if bullet:
-                self.bullets.append(bullet)
-                self.ammo -= 1
-
-            self.last_shoot_time = time.time()
+    # Reload method (private)
+    def __reload(self):
+        if self.__ammo < self.__magazine_capacity:
+            self.__reloading = True
+            Audio('assets/reload_sound.mp3', autoplay=True)
+            invoke(self.__finish_reload, delay=self.__reload_time)
 
     def reload(self):
-        if self.ammo < self.magazine_capacity:
-            self.reloading = True
-            Audio('assets/reload_sound.mp3', autoplay=True)
-            invoke(self.finish_reload, delay=self.reload_time)
+        self.__reload()
 
-    def finish_reload(self):
-        self.ammo = self.magazine_capacity
-        self.reloading = False
+    # Finish reload logic (private)
+    def __finish_reload(self):
+        self.__ammo = self.__magazine_capacity
+        self.__reloading = False
 
-    def decrement_health(self, number):
-        self.health.value -= number
-        if self.health.value <= 0:
-            self.health.value = 0
-            print("Player has died.")
+    @property
+    def controller(self):
+        return self.__controller
