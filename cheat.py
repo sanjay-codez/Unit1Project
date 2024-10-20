@@ -7,6 +7,25 @@ from customexception import GameException
 
 # Load saved data from pickle
 def load_game_state(filename="pickle_data/savefile.pkl"):
+    """
+        Loads the game state from a specified file.
+
+        This function checks if the specified save file exists and attempts to
+        deserialize the game state using the pickle module. If successful, it
+        returns the game state. If the file does not exist or if an error occurs
+        during loading, appropriate exceptions are raised.
+
+        Parameters:
+            filename (str): The path to the file from which the game state will be loaded.
+                            Default is "pickle_data/savefile.pkl".
+
+        Returns:
+            dict: The loaded game state containing player, enemy, and level information.
+
+        Raises:
+            GameException: If the save file does not exist, if deserialization fails, or
+                           if an unknown error occurs during loading.
+    """
     try:
         if os.path.exists(filename):
             with open(filename, "rb") as f:
@@ -27,6 +46,27 @@ def load_game_state(filename="pickle_data/savefile.pkl"):
 
 # Save data to pickle file
 def save_game_state(game_state, filename="pickle_data/savefile.pkl"):
+    """
+        Saves the current game state to a specified file.
+
+        This function serializes the provided game state using the pickle module
+        and writes it to the specified file. If the save is successful, it displays
+        a success message. If an error occurs during the saving process, an
+        appropriate exception is raised.
+
+        Parameters:
+            game_state (dict): The game state to be saved, containing player, enemy,
+                               and level information.
+            filename (str): The path to the file where the game state will be saved.
+                            Default is "pickle_data/savefile.pkl".
+
+        Returns:
+            None
+
+        Raises:
+            GameException: If serialization fails or if an error occurs during
+                           the file writing process.
+    """
     try:
         with open(filename, "wb") as f:
             try:
@@ -41,6 +81,21 @@ def save_game_state(game_state, filename="pickle_data/savefile.pkl"):
 
 # GUI to modify save data
 class SaveEditorGUI(ctk.CTk):
+    """
+        A graphical user interface for editing game save data.
+
+        This class provides an interface for loading and modifying the game state,
+        specifically allowing users to adjust the player's health and select the
+        current level. It uses the CustomTkinter library for the GUI components.
+
+        Attributes:
+            game_state (dict): The current game state loaded from a save file.
+
+        Methods:
+            setup_gui(): Sets up the GUI elements for editing player health and level selection.
+            save_changes(): Updates the game state with new values from the GUI elements
+                            and saves the modified state back to the file.
+    """
     def __init__(self):
         super().__init__()
 

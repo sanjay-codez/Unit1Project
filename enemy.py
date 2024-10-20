@@ -6,6 +6,28 @@ import time
 
 # Abstract Base Class for Enemy
 class Enemy(abc.ABC):
+    """
+        Abstract base class representing an enemy in the game.
+
+        This class defines the common attributes and methods for all enemy types,
+        including health management and attack behavior. It serves as a blueprint
+        for creating specific enemy subclasses.
+
+        Attributes:
+            position (Vec3): The position of the enemy in the game world.
+            health (int): The current health of the enemy.
+            max_health (int): The maximum health of the enemy.
+
+        Methods:
+            attack(): Abstract method to define the attack behavior of the enemy.
+            update_health_bar(): Abstract method to update the visual representation
+                                 of the enemy's health.
+            decrement_health(amount): Abstract method to reduce the enemy's health
+                                      by a specified amount.
+            is_alive(enemy_instance): Class method to check if the enemy is still alive.
+            siphon_health(enemy_instance, amount): Class method to restore health to the enemy
+                                                    when they siphon from the player.
+    """
     def __init__(self, position):
         self.position = position
         self.health = 100
@@ -39,6 +61,26 @@ class Enemy(abc.ABC):
 
 # Different Enemy Types
 class StandardEnemy(Enemy):
+    """
+        Represents a standard enemy type in the game.
+
+        This class defines the behavior and attributes of a standard enemy, including its
+        movement towards the player, health management, and attack logic. It inherits from
+        the abstract Enemy class.
+
+        Attributes:
+            entity (Entity): The visual representation of the enemy in the game world.
+            player_entity (Entity): Reference to the player entity for attack and movement logic.
+            all_enemies (list): Reference to the list of all enemy instances in the game.
+            health_bar (Entity): The visual representation of the enemy's health.
+            last_attack_time (float): The last time the enemy attacked the player.
+
+        Methods:
+            update_health_bar(): Updates the health bar size and color based on the enemy's current health.
+            attack(player): Checks the distance to the player and inflicts damage if within range.
+            decrement_health(amount): Reduces the enemy's health by a specified amount and handles death logic.
+            duplicate(position, player_entity, all_enemies): Class method to create a duplicate of the enemy.
+    """
     def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
@@ -103,9 +145,7 @@ class StandardEnemy(Enemy):
         # Add logic to destroy the enemy entity and remove from the enemies list
         if self.health <= 0:
 
-            # self.all_enemies.append(
-            #     StandardEnemy.duplicate(position=self.entity.position, player_entity=self.player_entity,
-            #                              all_enemies=self.all_enemies))
+
             destroy(self.entity)
             destroy(self.health_bar)
 
@@ -122,6 +162,27 @@ class StandardEnemy(Enemy):
 
 
 class FancyEnemy(Enemy):
+    """
+        Represents a fancy enemy type in the game.
+
+        This class defines the behavior and attributes of a fancy enemy, including its
+        movement towards the player, health management, and attack logic. It inherits from
+        the abstract Enemy class.
+
+        Attributes:
+            entity (Entity): The visual representation of the enemy in the game world.
+            player_entity (Entity): Reference to the player entity for attack and movement logic.
+            all_enemies (list): Reference to the list of all enemy instances in the game.
+            health_bar (Entity): The visual representation of the enemy's health.
+            last_attack_time (float): The last time the enemy attacked the player.
+
+        Methods:
+            update_health_bar(): Updates the health bar size and color based on the enemy's current health.
+            attack(player): Checks the distance to the player and inflicts damage if within range,
+                            and siphons health from the player.
+            decrement_health(amount): Reduces the enemy's health by a specified amount and handles death logic.
+            duplicate(position, player_entity, all_enemies): Class method to create a duplicate of the enemy.
+    """
     def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
@@ -200,6 +261,30 @@ class FancyEnemy(Enemy):
         return cls(position=position, player_entity=player_entity, all_enemies=all_enemies)
 
 class CameraMan(abc.ABC):
+    """
+        Abstract base class representing a CameraMan enemy in the game.
+
+        This class defines the common attributes and methods for all CameraMan types,
+        including health management and attack behavior. It serves as a blueprint
+        for creating specific CameraMan subclasses.
+
+        Attributes:
+            position (Vec3): The position of the CameraMan in the game world.
+            health (int): The current health of the CameraMan.
+            max_health (int): The maximum health of the CameraMan.
+
+        Methods:
+            attack(): Abstract method to define the attack behavior of the CameraMan.
+            update_health_bar(): Abstract method to update the visual representation
+                                 of the CameraMan's health.
+            decrement_health(amount): Abstract method to reduce the CameraMan's health
+                                      by a specified amount.
+            duplicate(position, player_entity, all_enemies): Abstract class method to create
+                                                              a duplicate of the CameraMan.
+            is_alive(enemy_instance): Class method to check if the CameraMan is still alive.
+            siphon_health(enemy_instance, amount): Class method to restore health to the CameraMan
+                                                    when they siphon from the player.
+    """
     def __init__(self, position):
         self.position = position
         self.health = 100
@@ -236,6 +321,26 @@ class CameraMan(abc.ABC):
 
 
 class StandardCameraMan(CameraMan):
+    """
+        Represents a standard CameraMan enemy type in the game.
+
+        This class defines the behavior and attributes of a standard CameraMan,
+        including its movement towards the player, health management, and attack logic.
+        It inherits from the CameraMan abstract class.
+
+        Attributes:
+            entity (Entity): The visual representation of the CameraMan in the game world.
+            player_entity (Entity): Reference to the player entity for attack and movement logic.
+            all_enemies (list): Reference to the list of all enemy instances in the game.
+            health_bar (Entity): The visual representation of the CameraMan's health.
+            last_attack_time (float): The last time the CameraMan attacked the player.
+
+        Methods:
+            update_health_bar(): Updates the health bar size and color based on the CameraMan's current health.
+            attack(player): Checks the distance to the player and inflicts damage if within range.
+            decrement_health(amount): Reduces the CameraMan's health by a specified amount and handles death logic.
+            duplicate(position, player_entity, all_enemies): Class method to create a duplicate of the CameraMan.
+    """
     def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
@@ -311,6 +416,27 @@ class StandardCameraMan(CameraMan):
         return cls(position=position, player_entity=player_entity, all_enemies=all_enemies)
 
 class FancyCameraMan(CameraMan):
+    """
+        Represents a fancy CameraMan enemy type in the game.
+
+        This class defines the behavior and attributes of a fancy CameraMan,
+        including its movement towards the player, health management, and attack logic.
+        It inherits from the CameraMan abstract class.
+
+        Attributes:
+            entity (Entity): The visual representation of the CameraMan in the game world.
+            player_entity (Entity): Reference to the player entity for attack and movement logic.
+            all_enemies (list): Reference to the list of all enemy instances in the game.
+            health_bar (Entity): The visual representation of the CameraMan's health.
+            last_attack_time (float): The last time the CameraMan attacked the player.
+
+        Methods:
+            update_health_bar(): Updates the health bar size and color based on the CameraMan's current health.
+            attack(player): Checks the distance to the player and inflicts damage if within range,
+                            while siphoning health from the player.
+            decrement_health(amount): Reduces the CameraMan's health by a specified amount and handles death logic.
+            duplicate(position, player_entity, all_enemies): Class method to create a duplicate of the CameraMan.
+    """
     def __init__(self, position, player_entity, all_enemies):
         super().__init__(position)
         self.entity = Entity(
@@ -391,6 +517,27 @@ class FancyCameraMan(CameraMan):
 
 # Custom SmoothFollow Script
 class CustomSmoothFollow(SmoothFollow):
+    """
+        A custom class for smooth following behavior for enemies.
+
+        This class extends the SmoothFollow functionality to allow enemies to smoothly follow the player,
+        while also maintaining a minimum distance from both the player and other enemies.
+
+        Attributes:
+            min_distance (float): Minimum distance to maintain from the player.
+            all_enemies (list): Reference to the list of all enemy instances in the game.
+            min_enemy_distance (float): Minimum distance to maintain from other enemies.
+
+        Methods:
+            calculate_distance(position1, position2): Calculates the distance between two positions.
+            calculate_desired_rotation_y(target_position, entity_position): Calculates the desired rotation
+                                                                            around the Y-axis to face the target.
+            lerp_rotation(current_rotation, desired_rotation, factor): Linearly interpolates between the current
+                                                                       and desired rotations.
+            ensure_ground_rotation(entity): Ensures that the entity maintains a horizontal rotation.
+            calculate_direction_away(position1, position2): Calculates the normalized direction away from one position to another.
+            update(): Updates the enemy's position and rotation to smoothly follow the player and avoid overlapping with other enemies.
+    """
     def __init__(self, target, offset=(0, 0, 0), speed=1, all_enemies=[]):
         super().__init__(target=target, offset=offset, speed=speed)
         self.min_distance = 2  # Minimum distance to maintain from the player

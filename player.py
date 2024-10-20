@@ -10,6 +10,38 @@ import customtkinter as ctk
 import sys
 
 class Player:
+    """
+        Represents the player character in the game.
+
+        This class encapsulates the player's attributes, such as position, speed, health,
+        ammunition, and shooting mechanics. It provides methods for updating the player's
+        state, handling shooting, and managing health.
+
+        Attributes:
+            __controller (FirstPersonController): The controller for player movement and actions.
+            __start_time (float): The time when the player started the game.
+            __weapon (Weapon): The player's weapon.
+            __bullets (list): A list of bullets shot by the player.
+            __shoot_cooldown (float): The cooldown time between shots.
+            __last_shoot_time (float): The last time the player shot.
+            __health (HealthBar): The player's health bar.
+            __ammo (int): The current ammunition count.
+            __magazine_capacity (int): The maximum capacity of the magazine.
+            __reloading (bool): Indicates whether the player is currently reloading.
+            __reload_time (float): The time it takes to reload.
+            __ammo_counter (Text): Displays the current ammo status on the screen.
+
+        Methods:
+            get_health(): Returns the current health of the player.
+            set_health(value): Sets the player's health to the specified value.
+            decrement_health(number): Decreases the player's health by a specified amount.
+            game_over_popup(): Displays a "Game Over" popup window.
+            exit_game(): Exits the game application.
+            shoot(): Triggers the shooting logic if conditions are met.
+            update(): Updates the player's state each frame, handling movement, shooting, and ammo status.
+            reload(): Initiates the reloading process.
+            controller: Property that returns the player controller.
+    """
     def __init__(self, position=(0, 2, 0), speed=5, jump_height=2):
         self.__controller = FirstPersonController(position=position)
         self.__controller.speed = speed
